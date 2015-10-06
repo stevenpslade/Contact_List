@@ -11,14 +11,30 @@ class Application
     gets.chomp
   end
 
-  def create_contact(name, email)
-    Contact.create(name, email)
-    Contact.add_contact
+  def new_contact
+    puts "Enter a name:"
+    @name = gets.chomp
+    puts "Enter an email:"
+    @email = gets.chomp
   end
 
-  def store_contact
-    new_contact = Contact.all
-    set_contact(new_contact)
+  def save_contact_arr
+    Contact.create(@name, @email)
+  end
+
+  def list_contacts
+    all_records = Contact.all
+    all_records.each_with_index do |contact, index|
+      puts "id #{index + 1}: #{contact['Name']} (#{contact[1]})"
+    end
+    puts "#{all_records.size} records total"
+  end
+
+  def show_contact(id)
+    show_records = Contact.show
+    show_records.each_with_index do |contact, index|
+      puts "#{contact['Name']} (#{contact[1]})" if (index + 1) == id.to_i
+    end
   end
 
   def interprets_input
@@ -27,20 +43,16 @@ class Application
       puts "Here is a list of available commands:\n\tnew  - Create a new contact\n\tlist - List all contacts\n\tshow - Show a contact\n\tfind - Find a contact"
       interprets_input
     when 'list'
-      get_contact
+      list_contacts
     when 'new'
-      puts "Enter a name"
-      name = gets.chomp
-      puts "Enter an email"
-      email = gets.chomp
-      create_contact(name, email)
-      store_contact
+      new_contact
+      save_contact_arr
     when 'show'
+      show_contact(start)
     when 'find'
+      Contact.find('Slade')
     end
   end
 end
 
-Contact.initialize_contact_arr
-test = Application.new
-test.interprets_input
+Application.new.interprets_input
