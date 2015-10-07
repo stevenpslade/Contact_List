@@ -48,7 +48,7 @@ class Application
   end
 
   def save_contact_arr
-    Contact.create(@name, @email, verify_phone)
+    Contact.create(@name, @email, @phone)
   end
 
   def list_contacts
