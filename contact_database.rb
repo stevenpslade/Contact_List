@@ -9,12 +9,6 @@ class ContactDatabase
       CSV.read("contact.csv", headers:true)
     end
 
-    # def self.all_contacts
-    #   CSV.foreach("contact.csv", headers:true) do |row|
-    #     puts ["#{($. - 1)}: #{row[0]} (#{row[1]})"]
-    #   end
-    # end
-
     def self.get_contact_id(input)
       CSV.foreach("contact.csv", headers:true) do |row|
         # Subtracting line number by 1 because it is counting headers as a line
