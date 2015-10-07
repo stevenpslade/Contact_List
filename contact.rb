@@ -2,7 +2,7 @@ class Contact
  
   attr_accessor :name, :email, :id, :phone
 
-  def initialize(name, email, phone=nil)
+  def initialize(name, email, phone)
     # TODO: assign local variables to instance variables
     @name = name
     @email = email
@@ -28,7 +28,7 @@ class Contact
       # TODO: Will find and return contacts that contain the term in the first name, last name or email
       find_records = ContactDatabase.read_contacts
       find_records.each_with_index do |contact|
-      puts "#{contact['Name']} (#{contact[1]})" if (contact['Name'] || contact[1]) == term
+      puts "#{contact['Name']} (#{contact['Email']}/#{contact['Phone']})" if (contact[1].include?(term) || contact[0].include?(term))
       end
     end
  

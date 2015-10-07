@@ -1,10 +1,13 @@
 require_relative 'contact'
 require_relative 'contact_database'
+require 'pry'
 
 # TODO: Implement command line interaction
 # This should be the only file where you use puts and gets
 
 class Application
+
+  attr_reader :phone
 
   # Get user input
   def start
@@ -19,15 +22,19 @@ class Application
     @email = STDIN.gets.chomp
   end
 
+  def phone
+    @phone = []
+  end
+
   def add_phone
-    @phone = ""
-    puts q = "Enter phone number and type"
+    puts question = "Enter phone number and type"
     @phone << STDIN.gets.chomp
     puts "Do you want to add another?"
-    phone_answer = STDIN.gets.chomp
-    if phone_answer == 'yes'
-      @phone << ","
+    answer = STDIN.gets.chomp
+    if answer == 'yes'
       add_phone
+    else
+      @phone = @phone.join(" ")
     end
   end
 
@@ -41,7 +48,7 @@ class Application
   end
 
   def save_contact_arr
-    Contact.create(@name, @email, @phone)
+    Contact.create(@name, @email, verify_phone)
   end
 
   def list_contacts
@@ -55,7 +62,7 @@ class Application
   def show_contact(id)
     show_records = Contact.show
     show_records.each_with_index do |contact, index|
-      puts "#{contact['Name']} (#{contact[1]}) (#{contact[2]})" if (index + 1) == id.to_i
+      puts "#{contact['Name']} (#{contact[1]}) #{contact[2]}" if (index + 1) == id.to_i
     end
   end
 
@@ -67,6 +74,7 @@ class Application
       list_contacts
     when 'new'
       new_contact
+      phone
       add_phone
       verify_duplicate
     when 'show'
