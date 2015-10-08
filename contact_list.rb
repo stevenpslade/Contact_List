@@ -54,7 +54,7 @@ class Application
   def list_contacts
     all_records = Contact.all
     all_records.each_with_index do |contact, index|
-      puts "id #{index + 1}: #{contact['Name']} (#{contact[1]})"
+      puts "id #{index + 1}: #{contact['Name']} (#{contact['Email']}/#{contact['Phone']})"
     end
     puts "#{all_records.size} records total"
   end
