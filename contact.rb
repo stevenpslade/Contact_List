@@ -1,40 +1,78 @@
-class Contact
- 
-  attr_accessor :name, :email, :id, :phone
+require 'pg'
+require 'pry'
 
-  def initialize(name, email, phone)
+class Contact
+
+  TABLE_NAME = 'contacts'
+  CONN = PG::Connection.new({
+      host: 'localhost',
+      user: 'development',
+      password: 'development',
+      dbname: 'contacts'
+      })
+ 
+  attr_accessor :firstname, :lastname, :email, :mobile, :other, :id
+
+  def initialize(firstname, lastname, email, mobile, other = nil, id = nil)
     # TODO: assign local variables to instance variables
-    @name = name
+    @firstname = firstname
+    @lastname = lastname
     @email = email
-    @phone = phone
+    @mobile = mobile
+    @other = other
+    @id = id
   end
  
   def to_s
-    # TODO: return string representation of Contact
+    "Name : #{@firstname} #{@lastname}\nEmail: #{@email}"
+  end
+
+  def save
+    if self.id
+      CONN.exec_params("UPDATE contacts SET first_name=$1, last_name=$2, email=$3, mobile=$4, other=$5 WHERE id=$6",
+        [@firstname, @lastname, @email, @mobile, @other, @id])
+    else
+      results = CONN.exec_params("INSERT INTO contacts (first_name, last_name, email, mobile, other) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+        [@firstname, @lastname, @email, @mobile, @other])
+      @id = results[0]["id"]
+    end
+  end
+
+  def destroy
+    if self.id
+      CONN.exec_params("DELETE FROM contacts WHERE id = $1;", [id])
+    end
   end
  
   ## Class Methods
   class << self
-    def create(name, email, phone)
-      # TODO: Will initialize a contact as well as add it to the list of contacts
-      new_contact = Contact.new(name, email, phone)
-      contacts_arr = [new_contact.name, new_contact.email, new_contact.phone]
-      ContactDatabase.contacts(contacts_arr)
-      ContactDatabase.write_csv
-      ContactDatabase.get_contact_id(contacts_arr[0])
+
+    def convert_to_objects(results)
+      contacts = []
+      results.each do |c|
+        contacts << Contact.new(c["first_name"], c["last_name"], c["email"], c["mobile"], c["other"], c["id"])
+      end
+      contacts.size > 1 ? contacts : contacts[0]
     end
  
-    def find(term)
-      # TODO: Will find and return contacts that contain the term in the first name, last name or email
-      find_records = ContactDatabase.read_contacts
-      find_records.each_with_index do |contact|
-      puts "#{contact['Name']} (#{contact['Email']}/#{contact['Phone']})" if (contact[1].include?(term) || contact[0].include?(term))
-      end
+    def find(id)
+      Contact.convert_to_objects(CONN.exec_params("SELECT * FROM #{TABLE_NAME} WHERE id = $1;", [id]))
+    end
+
+    def find_all_by_lastname(name)
+      Contact.convert_to_objects(CONN.exec_params("SELECT * FROM #{TABLE_NAME} WHERE last_name = $1;", [name]))
+    end
+
+    def find_all_by_firstname(name)
+      Contact.convert_to_objects(CONN.exec_params("SELECT * FROM #{TABLE_NAME} WHERE first_name = $1;", [name]))
+    end
+
+    def find_by_email(email)
+      Contact.convert_to_objects(CONN.exec_params("SELECT * FROM #{TABLE_NAME} WHERE email = $1;", [email]))
     end
  
     def all
-      # TODO: Return the list of contacts, as is
-      ContactDatabase.read_contacts
+      Contact.convert_to_objects(CONN.exec_params("SELECT * FROM #{TABLE_NAME}"))
     end
     
     def show
@@ -45,3 +83,5 @@ class Contact
   end
  
 end
+
+puts Contact.find(3)
