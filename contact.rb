@@ -84,4 +84,4 @@ class Contact
  
 end
 
-puts Contact.find_by_email("ls@example.com")
+puts Contact.find(3)
