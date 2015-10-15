@@ -7,80 +7,73 @@ require 'pry'
 
 class Application
 
-  attr_reader :phone
-
-  # Get user input
-  def start
-    puts "Enter a command:"
-    gets.chomp
-  end
-
   def new_contact
-    puts "Enter a name:"
-    @name = STDIN.gets.chomp
+    puts "Enter their first name:"
+    firstname = STDIN.gets.chomp
+    puts "Enter their last name:"
+    lastname = STDIN.gets.chomp
     puts "Enter an email:"
-    @email = STDIN.gets.chomp
+    email = STDIN.gets.chomp
+    puts "Enter a phone number:"
+    phone = STDIN.gets.chomp
+    Contact.add(firstname, lastname, email, phone)
   end
 
-  def phone
-    @phone = []
-  end
-
-  def add_phone
-    puts question = "Enter phone number and type"
-    @phone << STDIN.gets.chomp
-    puts "Do you want to add another?"
+  def update
+    puts "Select contact to update by ID"
+    id = STDIN.gets.chomp.to_i
+    found_con = Contact.find(id)
+    puts "What would you like to update?"
     answer = STDIN.gets.chomp
-    if answer == 'yes'
-      add_phone
-    else
-      @phone = @phone.join(" ")
-    end
+    case answer
+      when 'first name'
+        found_con[:first_name]  = STDIN.gets.chomp
+      when 'last name'
+        found_con[:last_name]  = STDIN.gets.chomp
+      when 'email'
+        found_con[:email]  = STDIN.gets.chomp
+      when 'mobile'
+        found_con[:mobile]  = STDIN.gets.chomp
+      end
+    found_con.save
   end
 
-  def verify_duplicate
-    Contact.all.each do |contact|
-      if contact[1] == @email
-      return puts "This contact already exists. Please use another email."
-    end
-  end
-    save_contact_arr
-  end
-
-  def save_contact_arr
-    Contact.create(@name, @email, @phone)
-  end
-
-  def list_contacts
-    all_records = Contact.all
-    all_records.each_with_index do |contact, index|
-      puts "id #{index + 1}: #{contact['Name']} (#{contact['Email']}/#{contact['Phone']})"
-    end
-    puts "#{all_records.size} records total"
+  def find_by
+    puts "How would you like to find by (first name, last name, email)?"
+    answer = STDIN.gets.chomp
+    case answer
+      when 'first name'
+        puts Contact.find_all_by_firstname(STDIN.gets.chomp)
+      when 'last name'
+        puts Contact.find_all_by_lastname(STDIN.gets.chomp)
+      when 'email'
+        puts Contact.find_by_email(STDIN.gets.chomp)
+      end
   end
 
-  def show_contact(id)
-    show_records = Contact.show
-    show_records.each_with_index do |contact, index|
-      puts "#{contact['Name']} (#{contact[1]}) #{contact[2]}" if (index + 1) == id.to_i
-    end
+  def delete
+    puts "Select contact to update by ID"
+    id = STDIN.gets.chomp.to_i
+    Contact.delete(id)
+    puts "Contact deleted."
   end
 
   def interprets_input
     case ARGV[0]
     when 'help'
-      puts "Here is a list of available commands:\n\tnew  - Create a new contact\n\tlist - List all contacts\n\tshow - Show a contact\n\tfind - Find a contact"
+      puts "Here is a list of available commands:\n\tnew  - Create a new contact\n\tupdate  - Update a new contact\n\tdelete  - Delete a contact\n\tlist - List all contacts\n\tshow - Show a contact\n\tfind - Find a contact"
     when 'list'
-      list_contacts
+      puts Contact.list
     when 'new'
       new_contact
-      phone
-      add_phone
-      verify_duplicate
     when 'show'
-      show_contact(ARGV[1].to_i)
+      puts Contact.search(ARGV[1].to_i)
     when 'find'
-      Contact.find(ARGV[1])
+      find_by
+    when 'update'
+      update
+    when 'delete'
+      delete
     end
   end
 end
