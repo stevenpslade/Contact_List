@@ -1,5 +1,6 @@
+require_relative 'setup'
 require_relative 'contact'
-require_relative 'contact_database'
+require_relative 'phone'
 require 'pry'
 
 # TODO: Implement command line interaction
@@ -14,9 +15,15 @@ class Application
     lastname = STDIN.gets.chomp
     puts "Enter an email:"
     email = STDIN.gets.chomp
-    puts "Enter a phone number:"
-    phone = STDIN.gets.chomp
-    Contact.add(firstname, lastname, email, phone)
+    puts "Enter phone number:"
+    number = STDIN.gets.chomp
+    puts "What type of number?"
+    type  = STDIN.gets.chomp
+    @new_contact = Contact.add(firstname, lastname, email)
+  end
+
+  def display_error
+    @new_contact.errors.messages.each_pair { |k, v| puts "The #{k} #{v[0]}."}
   end
 
   def update
@@ -32,8 +39,8 @@ class Application
         found_con[:last_name]  = STDIN.gets.chomp
       when 'email'
         found_con[:email]  = STDIN.gets.chomp
-      when 'mobile'
-        found_con[:mobile]  = STDIN.gets.chomp
+      # when 'number'
+      #   found_con.phones[:number] = STDIN.gets.chomp
       end
     found_con.save
   end
@@ -54,7 +61,7 @@ class Application
   def delete
     puts "Select contact to update by ID"
     id = STDIN.gets.chomp.to_i
-    Contact.delete(id)
+    Contact.destroy(id)
     puts "Contact deleted."
   end
 
@@ -66,6 +73,7 @@ class Application
       puts Contact.list
     when 'new'
       new_contact
+      display_error
     when 'show'
       puts Contact.search(ARGV[1].to_i)
     when 'find'

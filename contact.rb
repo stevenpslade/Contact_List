@@ -1,31 +1,32 @@
-require 'pg'
-require 'pry'
-require 'active_record'
+# require 'pg'
+# require 'pry'
+# require 'active_record'
 
-ActiveRecord::Base.establish_connection(
-  adapter: 'postgresql',
-  database: 'contacts',
-  username: 'development',
-  password: 'development',
-  host: 'localhost',
-  port: 5432,
-  pool: 5,
-  encoding: 'unicode',
-  min_messages: 'error'
-)
+# ActiveRecord::Base.establish_connection(
+#   adapter: 'postgresql',
+#   database: 'contacts',
+#   username: 'development',
+#   password: 'development',
+#   host: 'localhost',
+#   port: 5432,
+#   pool: 5,
+#   encoding: 'unicode',
+#   min_messages: 'error'
+# )
 
 class Contact < ActiveRecord::Base
-
+  has_many :phones
   validates_uniqueness_of :email
  
   def to_s
-    "ID: #{id}\nName : #{first_name} #{last_name}\nEmail: #{email}\nPhone: #{mobile}"
+    "ID: #{id}\nName : #{first_name} #{last_name}\nEmail: #{email}"
   end
 
 class << self
 
-  def add(firstname, lastname, email, phone)
-    Contact.create(first_name: firstname, last_name: lastname, email: email, mobile: phone)
+  def add(firstname, lastname, email)
+    new = Contact.create(first_name: firstname, last_name: lastname, email: email)
+    new.phones.create(number: "444-4444", phone_type: "mobile")
   end
  
   def search(id)
